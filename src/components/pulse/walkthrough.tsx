@@ -1,64 +1,100 @@
 import { useEffect, useRef, useState } from "react";
 
+type Hotspot = { x: number; y: number; label: string; tip: string };
+type Chapter = {
+  n: string; label: string; title: string; body: string;
+  stage: React.ReactNode; hotspots: Hotspot[];
+};
+
 /** A vertical scroll storytelling section with a sticky stage on the right
- * and chapter cards on the left. Each chapter shows a different mini-preview. */
+ * and chapter cards on the left. Each chapter shows a different mini-preview
+ * with clickable "Try it" annotations + an auto-play guided tour. */
 export function CampaignWalkthrough() {
   const chapters: Chapter[] = [
     {
-      n: "01",
-      label: "Strategy",
+      n: "01", label: "Strategy",
       title: "A campaign begins as a hypothesis.",
       body: "Leadership defines theory of change, target wards, milestones, and the coordinators accountable for each. Pulse holds the plan — and watches it move.",
       stage: <StagePlan />,
+      hotspots: [
+        { x: 18, y: 22, label: "Theory of change", tip: "Define your campaign hypothesis — the story you're testing in the world." },
+        { x: 78, y: 22, label: "Milestone bar", tip: "Each milestone tracks against the days-to-election countdown." },
+        { x: 22, y: 70, label: "Plan timeline", tip: "Status moves automatically as work completes in other workspaces." },
+      ],
     },
     {
-      n: "02",
-      label: "Organization",
+      n: "02", label: "Organization",
       title: "Volunteers become a structured movement.",
       body: "Roles, regions, and permissions are assigned. New volunteers onboard themselves through a QR. Every action flows back to the org chart.",
       stage: <StageOrg />,
+      hotspots: [
+        { x: 50, y: 22, label: "Campaign Manager", tip: "The org root. Every action eventually rolls up here for accountability." },
+        { x: 26, y: 45, label: "Comms team", tip: "Owns press, WhatsApp blasts, and narrative discipline." },
+        { x: 73, y: 45, label: "Data team", tip: "Polling, maps, and intelligence dashboards live here." },
+      ],
     },
     {
-      n: "03",
-      label: "Manifesto",
+      n: "03", label: "Manifesto",
       title: "Policy becomes a living document.",
       body: "The manifesto is composed from a versioned library. Each chapter ties to projects, communities, and the wards that asked for it.",
       stage: <StageManifesto />,
+      hotspots: [
+        { x: 78, y: 38, label: "Drafted %", tip: "Each chapter has its own draft, review and approval workflow." },
+        { x: 20, y: 38, label: "Chapter number", tip: "Reorder chapters by dragging — numbering recomputes everywhere it appears." },
+      ],
     },
     {
-      n: "04",
-      label: "Community",
+      n: "04", label: "Community",
       title: "Supporters are organized, not collected.",
       body: "People are clustered by geography and interest. Conversations stay contextual. The relationship outlives the cycle.",
       stage: <StageCommunity />,
+      hotspots: [
+        { x: 26, y: 22, label: "Ward count", tip: "Communities are scoped by geography so coordinators see their own people." },
+        { x: 76, y: 22, label: "Weekly growth", tip: "Pulse highlights wards growing — and the ones that suddenly aren't." },
+        { x: 30, y: 78, label: "Live themes", tip: "Recurring conversation topics surface here and feed straight into Polling." },
+      ],
     },
     {
-      n: "05",
-      label: "Operations",
+      n: "05", label: "Operations",
       title: "Field coordination at the speed of the day.",
       body: "Events, canvassing routes, and ward assignments coordinate through one operational timeline. Status is observed, not requested.",
       stage: <StageOps />,
+      hotspots: [
+        { x: 50, y: 20, label: "Live counters", tip: "Events, routes and volunteers all in one glance — refreshed in real time." },
+        { x: 28, y: 70, label: "Coverage map", tip: "Tap a pin to see who's on the ground, what they're doing, and what's next." },
+        { x: 78, y: 70, label: "Hotspot pin", tip: "Pulse flags zones that need attention — low coverage, incidents, or surges." },
+      ],
     },
     {
-      n: "06",
-      label: "Polling",
+      n: "06", label: "Polling",
       title: "Public sentiment, structured.",
       body: "Polls and consultations gather structured input. Recurring themes surface automatically and inform the next decision.",
       stage: <StagePolling />,
+      hotspots: [
+        { x: 50, y: 32, label: "Top issue", tip: "Issues are weighted by ward and demographic — not just raw counts." },
+        { x: 50, y: 82, label: "Sample size", tip: "Every poll shows ward distribution so leadership can spot blind spots." },
+      ],
     },
     {
-      n: "07",
-      label: "Election Day",
+      n: "07", label: "Election Day",
       title: "One screen. One source of truth.",
       body: "Polling stations, agents, incidents, and turnout consolidate in real time. Decisions move from instinct to evidence.",
       stage: <StageEDay />,
+      hotspots: [
+        { x: 26, y: 22, label: "Turnout live", tip: "Compared against the previous cycle so swings show immediately." },
+        { x: 76, y: 22, label: "Stations reporting", tip: "Drilldown to the station: agent, incidents, ballot box status." },
+        { x: 50, y: 75, label: "Live ticker", tip: "Every operational event lands here — and routes to the right team." },
+      ],
     },
     {
-      n: "08",
-      label: "Governance",
+      n: "08", label: "Governance",
       title: "The mandate becomes a delivery plan.",
       body: "The campaign workspace transitions into a governance workspace. Communities, projects, and promises carry over — intact.",
       stage: <StageGov />,
+      hotspots: [
+        { x: 27, y: 50, label: "Campaign artifacts", tip: "Manifesto chapters, communities and issues — the campaign's institutional memory." },
+        { x: 73, y: 50, label: "Governance equivalents", tip: "Each artifact transitions into its delivery-side counterpart on Day 1." },
+      ],
     },
   ];
 
@@ -66,9 +102,11 @@ export function CampaignWalkthrough() {
     <section id="walkthrough" className="relative">
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
         <div className="max-w-3xl pb-16 md:pb-24">
-          <div className="eyebrow mb-5">— The Lifecycle</div>
+          <div className="eyebrow mb-5">— The Lifecycle · Interactive Tour</div>
           <h2 className="display-lg text-navy">Follow a campaign through Pulse.</h2>
-          <p className="lede mt-5">Scroll through an entire election cycle, one workspace at a time. Each chapter is how a real campaign actually moves.</p>
+          <p className="lede mt-5">
+            Scroll through an entire election cycle, one workspace at a time. Tap the numbered pins on each preview — or press <em className="not-italic text-civic">Take the tour</em> to let Pulse walk you through.
+          </p>
         </div>
 
         <div className="grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-10 md:gap-16">
@@ -83,10 +121,6 @@ export function CampaignWalkthrough() {
     </section>
   );
 }
-
-type Chapter = {
-  n: string; label: string; title: string; body: string; stage: React.ReactNode;
-};
 
 function ChapterCard({ chapter, index }: { chapter: Chapter; index: number }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -114,6 +148,14 @@ function ChapterCard({ chapter, index }: { chapter: Chapter; index: number }) {
         </div>
         <h3 className="display-md text-navy max-w-[20ch]">{chapter.title}</h3>
         <p className="mt-4 text-graphite max-w-prose leading-relaxed">{chapter.body}</p>
+        <ul className="mt-5 space-y-1.5">
+          {chapter.hotspots.map((h, i) => (
+            <li key={i} className="flex items-baseline gap-3 text-[12px] text-graphite">
+              <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-civic/15 text-civic font-mono text-[10px] flex-shrink-0">{i + 1}</span>
+              <span><span className="text-navy">{h.label}</span> — {h.tip}</span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
@@ -121,11 +163,46 @@ function ChapterCard({ chapter, index }: { chapter: Chapter; index: number }) {
 
 function StickyStage({ chapters }: { chapters: Chapter[] }) {
   const [idx, setIdx] = useState(0);
+  const [openHot, setOpenHot] = useState<number | null>(null);
+  const [touring, setTouring] = useState(false);
+
   useEffect(() => {
-    const handler = (e: Event) => setIdx((e as CustomEvent<number>).detail);
+    const handler = (e: Event) => {
+      setIdx((e as CustomEvent<number>).detail);
+      setOpenHot(null);
+    };
     window.addEventListener("pulse:chapter", handler);
     return () => window.removeEventListener("pulse:chapter", handler);
   }, []);
+
+  // Guided tour auto-cycles through hotspots, then advances chapter.
+  useEffect(() => {
+    if (!touring) return;
+    const hots = chapters[idx].hotspots;
+    let cancelled = false;
+    let i = 0;
+    setOpenHot(0);
+    const tick = () => {
+      if (cancelled) return;
+      i += 1;
+      if (i >= hots.length) {
+        if (idx < chapters.length - 1) {
+          setIdx(idx + 1);
+        } else {
+          setTouring(false);
+          setOpenHot(null);
+        }
+        return;
+      }
+      setOpenHot(i);
+      timer = setTimeout(tick, 2200);
+    };
+    let timer = setTimeout(tick, 2200);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [touring, idx, chapters]);
+
+  const current = chapters[idx];
+
   return (
     <div className="hidden md:block">
       <div className="sticky top-28">
@@ -138,14 +215,68 @@ function StickyStage({ chapters }: { chapters: Chapter[] }) {
               {c.stage}
             </div>
           ))}
+
+          {/* Hotspot pins for the active chapter */}
+          <div className="absolute inset-0 pointer-events-none">
+            {current.hotspots.map((h, i) => {
+              const open = openHot === i;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setOpenHot(open ? null : i)}
+                  className="absolute pointer-events-auto group"
+                  style={{ left: `${h.x}%`, top: `${h.y}%`, transform: "translate(-50%, -50%)" }}
+                  aria-label={`Try it — ${h.label}`}
+                >
+                  <span className="relative flex items-center justify-center">
+                    <span className={`absolute inline-flex h-7 w-7 rounded-full bg-civic/40 ${open ? "animate-ping" : "opacity-0 group-hover:opacity-60"}`} />
+                    <span className={`relative inline-flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-mono border transition-colors ${open ? "bg-navy text-canvas border-navy" : "bg-canvas text-navy border-navy/40 group-hover:border-navy"}`}>
+                      {i + 1}
+                    </span>
+                  </span>
+                  {open && (
+                    <div
+                      className="absolute z-10 w-56 p-3 rounded-lg bg-navy text-canvas shadow-[0_20px_50px_-20px_rgba(20,30,60,0.6)] text-left"
+                      style={{
+                        left: h.x > 60 ? "auto" : "calc(100% + 10px)",
+                        right: h.x > 60 ? "calc(100% + 10px)" : "auto",
+                        top: "-4px",
+                      }}
+                    >
+                      <div className="font-mono text-[9px] uppercase tracking-[0.18em] text-civic-soft mb-1">Try it · {String(i + 1).padStart(2, "0")}</div>
+                      <div className="font-medium text-[13px] leading-snug">{h.label}</div>
+                      <div className="mt-1 text-[12px] text-canvas/75 leading-relaxed">{h.tip}</div>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Chrome */}
+          <div className="absolute top-3 right-3 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setTouring((t) => !t)}
+              className={`pointer-events-auto inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-mono uppercase tracking-[0.12em] border transition-colors ${touring ? "bg-navy text-canvas border-navy" : "bg-card text-navy border-hairline hover:border-navy/40"}`}
+            >
+              <span className={`h-1.5 w-1.5 rounded-full ${touring ? "bg-civic-soft animate-pulse" : "bg-civic"}`} />
+              {touring ? "Touring…" : "Take the tour"}
+            </button>
+          </div>
+
           <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-[11px] text-graphite font-mono">
-            <span>{chapters[idx].n} · {chapters[idx].label.toUpperCase()}</span>
+            <span>{current.n} · {current.label.toUpperCase()}</span>
             <div className="flex gap-1.5">
               {chapters.map((_, i) => (
                 <span key={i} className={`h-1 w-3 rounded-full transition-colors ${i === idx ? "bg-navy" : "bg-hairline"}`} />
               ))}
             </div>
           </div>
+        </div>
+        <div className="mt-3 text-[11px] font-mono text-graphite text-center">
+          {openHot !== null ? `Showing annotation ${openHot + 1} of ${current.hotspots.length} · click pin to close` : `Click any numbered pin · ${current.hotspots.length} annotations on this view`}
         </div>
       </div>
     </div>
@@ -168,11 +299,11 @@ function StagePlan() {
   return (
     <StageFrame title="Strategy Board">
       <div className="grid grid-cols-3 gap-2 mb-4">
-        {["Theory", "Targets", "Milestones"].map((t) => (
+        {["Theory", "Targets", "Milestones"].map((t, i) => (
           <div key={t} className="rounded-lg border border-hairline p-3">
             <div className="text-[10px] uppercase tracking-[0.18em] text-graphite">{t}</div>
             <div className="mt-2 h-1 bg-hairline rounded-full overflow-hidden">
-              <div className="h-full bg-navy" style={{ width: `${40 + Math.random() * 50}%` }} />
+              <div className="h-full bg-navy" style={{ width: `${[55, 70, 82][i]}%` }} />
             </div>
           </div>
         ))}
@@ -201,12 +332,6 @@ function StageOrg() {
   return (
     <StageFrame title="Org Chart">
       <svg viewBox="0 0 300 280" className="w-full h-full">
-        <defs>
-          <marker id="dot" markerWidth="6" markerHeight="6" refX="3" refY="3">
-            <circle cx="3" cy="3" r="2" fill="oklch(0.22 0.07 256)" />
-          </marker>
-        </defs>
-        {/* edges */}
         {[
           [150,40,80,110],[150,40,150,110],[150,40,220,110],
           [80,110,40,200],[80,110,110,200],[150,110,150,200],[220,110,200,200],[220,110,260,200],
@@ -295,7 +420,6 @@ function StageOps() {
       </div>
       <div className="rounded-lg bg-canvas-warm/60 border border-hairline p-3 h-[180px] relative overflow-hidden">
         <svg viewBox="0 0 240 160" className="absolute inset-0 w-full h-full">
-          {/* fake map regions */}
           {Array.from({length: 7}).map((_,i)=>(
             <path key={i} d={`M${10+i*30} 20 q15 ${10+i*5} 25 ${30+i*4} t10 ${50-i*3} z`} fill={i%3===0?"oklch(0.78 0.09 152 / 0.35)":"oklch(0.9 0.012 80)"} stroke="oklch(0.85 0.012 80)" strokeWidth="0.5" />
           ))}

@@ -5,6 +5,7 @@ import { NetworkBackdrop } from "@/components/pulse/network-backdrop";
 import { MissionControlPreview } from "@/components/pulse/mission-control-preview";
 import { CampaignWalkthrough } from "@/components/pulse/walkthrough";
 import { EcosystemOrbit } from "@/components/pulse/ecosystem";
+import { ContactSection } from "@/components/pulse/contact";
 import { useReveal } from "@/hooks/use-reveal";
 
 export const Route = createFileRoute("/")({
@@ -32,8 +33,9 @@ function Index() {
       <FeatureShowcases />
       <IntelligenceSection />
       <GovernanceSection />
-      <Closing />
-      <Footer />
+        <Closing />
+        <ContactSection />
+        <Footer />
     </div>
   );
 }
