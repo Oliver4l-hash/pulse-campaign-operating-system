@@ -1,5 +1,8 @@
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { submitDemoRequest } from "@/lib/demo-request.functions";
+
 
 const schema = z.object({
   name: z.string().trim().min(2, "Please share your name").max(100),
@@ -16,16 +19,19 @@ type Errors = Partial<Record<keyof FormState, string>>;
 const STAGES = ["Pre-launch", "Active campaign", "Last 90 days", "Post-election / governance"];
 
 export function ContactSection() {
+  const submit = useServerFn(submitDemoRequest);
   const [data, setData] = useState<FormState>({
     name: "", email: "", organization: "", role: "", stage: "", message: "",
   });
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const update = <K extends keyof FormState>(k: K, v: FormState[K]) => {
     setData((d) => ({ ...d, [k]: v }));
     if (errors[k]) setErrors((e) => ({ ...e, [k]: undefined }));
+    if (submitError) setSubmitError(null);
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -41,10 +47,18 @@ export function ContactSection() {
       return;
     }
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 700));
-    setSubmitting(false);
-    setDone(true);
+    setSubmitError(null);
+    try {
+      await submit({ data: result.data });
+      setDone(true);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      setSubmitError(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
+
 
   return (
     <section id="contact" className="relative py-32 md:py-44 border-t border-hairline bg-canvas-warm/40">
@@ -114,6 +128,13 @@ export function ContactSection() {
                     <textarea id="message" value={data.message} onChange={(e) => update("message", e.target.value)} rows={5} className={`${inputCls} resize-none`} placeholder="Mission Control, ward operations, manifesto…" maxLength={1000} />
                     <div className="mt-1 text-right text-[10px] font-mono text-graphite">{data.message.length}/1000</div>
                   </Field>
+
+                  {submitError && (
+                    <div role="alert" className="flex items-start gap-3 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-[12px] text-destructive">
+                      <svg viewBox="0 0 24 24" className="h-4 w-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" strokeLinecap="round"/></svg>
+                      <span>{submitError}</span>
+                    </div>
+                  )}
 
                   <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
                     <p className="text-[11px] text-graphite max-w-sm">By submitting you agree to be contacted by the Pulse team. We don't share your details.</p>
