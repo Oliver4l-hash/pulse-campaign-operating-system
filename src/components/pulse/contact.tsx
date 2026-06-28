@@ -46,20 +46,28 @@ export function ContactSection() {
         if (!errs[key]) errs[key] = issue.message;
       }
       setErrors(errs);
+      toast.error("Please fix the highlighted fields before submitting.");
       return;
     }
     setSubmitting(true);
     setSubmitError(null);
+    const toastId = toast.loading("Sending your request…");
     try {
       await submit({ data: result.data });
+      toast.success("Request received", {
+        id: toastId,
+        description: "We'll be in touch within one business day.",
+      });
       setDone(true);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong. Please try again.";
       setSubmitError(msg);
+      toast.error("Submission failed", { id: toastId, description: msg });
     } finally {
       setSubmitting(false);
     }
   };
+
 
 
   return (
