@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { z } from "zod";
 import { submitDemoRequest } from "@/lib/demo-request.functions";
+
 
 
 const schema = z.object({
@@ -44,20 +46,28 @@ export function ContactSection() {
         if (!errs[key]) errs[key] = issue.message;
       }
       setErrors(errs);
+      toast.error("Please fix the highlighted fields before submitting.");
       return;
     }
     setSubmitting(true);
     setSubmitError(null);
+    const toastId = toast.loading("Sending your request…");
     try {
       await submit({ data: result.data });
+      toast.success("Request received", {
+        id: toastId,
+        description: "We'll be in touch within one business day.",
+      });
       setDone(true);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong. Please try again.";
       setSubmitError(msg);
+      toast.error("Submission failed", { id: toastId, description: msg });
     } finally {
       setSubmitting(false);
     }
   };
+
 
 
   return (
@@ -142,7 +152,17 @@ export function ContactSection() {
                       type="submit" disabled={submitting}
                       className="inline-flex items-center gap-2 rounded-full bg-navy text-canvas px-6 py-3 text-sm font-medium hover:bg-ink transition-colors disabled:opacity-60"
                     >
-                      {submitting ? "Sending…" : <>Request demonstration <span aria-hidden>→</span></>}
+                      {submitting ? (
+                        <>
+                          <svg viewBox="0 0 24 24" className="h-4 w-4 animate-spin" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
+                            <path d="M21 12a9 9 0 1 1-6.219-8.56" strokeLinecap="round" />
+                          </svg>
+                          Sending…
+                        </>
+                      ) : (
+                        <>Request demonstration <span aria-hidden>→</span></>
+                      )}
+
                     </button>
                   </div>
                 </form>
